@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap"
+        rel="stylesheet">
+
+    <link href="style.css" rel="stylesheet">
+      <script src="script.js" defer></script>
+    <title>Currency Converter</title>
+</head>
+
+<body>
+
+    <img src="./assets/logo2.gif" class="logo" alt="logo-devclub-currency">
+
+    <main>
+
+        <label>
+            Converter <b>de</b>:
+            <select>
+                <option>R$ Real brasileiro </option>
+            </select>
+        </label>
+
+        <label>
+            Converter <b>para</b>:
+            <select class="currency-select">
+                <option value="dolar">US$ Dólar americano</option>
+                <option value="euro">€ Euro</option>
+                <option value="libra">£ Libra</option>
+                <option value="btc">BTC BitCoin</option>
+            </select>
+
+        </label>
+
+        <label>
+
+            <b>Valor</b>:
+
+        </label>
+
+        <input class="inputCurrency" placeholder="R$ 0,00">
+
+        <button class="convertButton">Converter</button>
+
+        <section>
+            <div class="currency-box">
+                <img src="./assets/real.png" alt="logo-moeda-a-converter">
+                <p class="currency">Real</p>
+                <p class="currency-value-to-convert">R$ 0,00</p>
+
+            </div>
+
+            <img class="arrow-img" src="./assets/arrow.png" alt="seta">
+
+            <div class="currency-box">
+                <img class="currency-img" src="./assets/dollar.png" alt="logo-moeda-a-convertertida">
+                <p class="currency" id="currency-name">Dolar Americano</p>
+                <p class="currency-value">US$ 0,00</p>
+
+            </div>
+
+
+            
+       
+        </section>
+    </main>
+
+
+
+
+</body>
+
+</html>
