@@ -1,83 +1,119 @@
-const convertButton = document.querySelector(".convertButton") // Variavel que Seleciona o primeiro elemento HTML com a classe convertButton e armazena sua referência na constante convertButton.
-const currencySelect = document.querySelector(".currency-select")
+const convertButton = document.querySelector(".convertButton");
+const currencySelect = document.querySelector(".currency-select");
+
+async function getExchangeRate(toCurrency) {
+    try {
+        if (toCurrency === "bitcoin") {
+            return await getBTCToday();
+        }
+
+        const apiKey = "cur_live_tb4rJm4GcxX8hlF0m77TUQ7IBbT4rrPzSyMuvzH2"; // 🔥 Substitua pela chave válida
+        const response = await fetch(`https://api.currencyapi.com/v3/latest?apikey=${apiKey}&currencies=${toCurrency.toUpperCase()}&base_currency=BRL`);
+        
+        console.log("Status da resposta da API:", response.status); // 🔍 Debug para conferir o status
+        
+        if (!response.ok) throw new Error("Erro na requisição da API!");
+
+        const data = await response.json();
+        console.log("Dados da API CurrencyAPI:", data);
+
+        if (!data.data || !data.data[toCurrency.toUpperCase()]) {
+            console.error(`Taxa de câmbio para ${toCurrency} não disponível.`);
+            return null;
+        }
+
+        return data.data[toCurrency.toUpperCase()].value;
+    } catch (error) {
+        console.error("Erro ao obter taxa de câmbio:", error);
+        return null;
+    }
+}
 
 async function getBTCToday() {
-    const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=brl")
-    const data = await response.json()
-    return data.bitcoin.brl
+    try {
+        const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=brl");
+        if (!response.ok) throw new Error("Erro na requisição da API de Bitcoin!");
+
+        const data = await response.json();
+        console.log("Cotação do Bitcoin em BRL:", data.bitcoin.brl);
+
+        return data.bitcoin.brl;
+    } catch (error) {
+        console.error("Erro ao obter cotação do Bitcoin:", error);
+        return null;
+    }
 }
 
 async function convertValues() {
-    const inputCurrency = document.querySelector(".inputCurrency").value// pega somente o valor de dentro do input com o .value
-    const currencyValueToConvert = document.querySelector(".currency-value-to-convert")
-    const currencyValue = document.querySelector(".currency-value")
-    const amountInReal = parseFloat(inputCurrency) // converte o valor da string(variavel) em numero decimal(float)
+    const inputCurrency = document.querySelector(".inputCurrency").value;
+    const currencyValueToConvert = document.querySelector(".currency-value-to-convert");
+    const currencyValue = document.querySelector(".currency-value");
+    const amountInReal = parseFloat(inputCurrency);
 
     if (isNaN(amountInReal) || amountInReal <= 0) {
-        alert("Por favor, insere um valor válido em reais.")
-        return
+        alert("Por favor, insira um valor válido em reais.");
+        return;
     }
 
-   
-    const dollarToday = 5.6
-    const euroToday = 6.3
-    const libraToday = 7.5
-    const btcToday = await getBTCToday()
+    currencyValueToConvert.innerHTML = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    }).format(amountInReal);
 
+    const currencyMap = {
+        dolar: "usd",
+        euro: "eur",
+        libra: "gbp",
+        btc: "bitcoin"
+    };
 
+    let convertedValue;
+    const selectedCurrency = currencyMap[currencySelect.value];
 
-        currencyValueToConvert.innerHTML = new Intl.NumberFormat("pt-BR", {
-            style: "currency", currency: "BRL"
-        }).format(inputCurrency)
+    if (selectedCurrency === "bitcoin") {
+        const btcToday = await getBTCToday();
+        if (!btcToday) {
+            currencyValue.innerHTML = "Erro na conversão";
+            return;
+        }
+        convertedValue = (amountInReal / btcToday).toFixed(10) + " BTC";
+    } else {
+        const rate = await getExchangeRate(selectedCurrency);
 
-    if (currencySelect.value == "dolar") {
-        currencyValue.innerHTML = new Intl.NumberFormat("en-US", {
-            style: "currency", currency: "USD"
-        }).format(amountInReal / dollarToday)
+        if (!rate || rate === null) {
+            currencyValue.innerHTML = "Erro na conversão: taxa de câmbio não encontrada!";
+            console.error("Taxa de câmbio não disponível para:", selectedCurrency);
+            return;
+        }
 
+        convertedValue = new Intl.NumberFormat("pt-BR", {
+            style: "currency",
+            currency: selectedCurrency
+        }).format(amountInReal * rate);
     }
 
-    if (currencySelect.value == "euro") {
-        currencyValue.innerHTML = new Intl.NumberFormat("de-DE", {
-            style: "currency", currency: "EUR"
-        }).format(amountInReal / euroToday)
+    console.log(`Convertendo ${amountInReal} BRL para ${selectedCurrency}: ${convertedValue}`);
 
-    }
-
-    if (currencySelect.value == "libra") {
-        currencyValue.innerHTML = new Intl.NumberFormat("en-GB", {
-            style: "currency", currency: "GBP"
-        }).format(amountInReal / libraToday)
-    }
-
-    if (currencySelect.value == "btc") {
-        currencyValue.innerHTML = (amountInReal / btcToday).toFixed(10) + " BTC"
-    }
-
-
+    currencyValue.innerHTML = convertedValue;
 }
 
 function changeCurrency() {
-    const currencyName = document.getElementById("currency-name")
-    const currencyImg = document.querySelector(".currency-img")
+    const currencyName = document.getElementById("currency-name");
+    const currencyImg = document.querySelector(".currency-img");
 
-    if (currencySelect.value == 'dolar') {
-        currencyName.innerHTML = 'Dólar Americano'
-        currencyImg.src = "./assets/dollar.png"
-        
-    } else if (currencySelect.value == 'euro') {
-        currencyName.innerHTML = 'Euro'
-        currencyImg.src = "./assets/euro.png"
-    } else if (currencySelect.value == 'libra') {
-        currencyName.innerHTML = 'Libra Esterlina'
-        currencyImg.src = "./assets/libra.png"
-    } else if (currencySelect.value == 'btc') {
-        currencyName.innerHTML = 'Bitcoin'
-        currencyImg.src = "./assets/bitcoin.png"
-    }
-    
-    convertValues()
+    const currencyData = {
+        dolar: { name: "Dólar Americano", img: "./assets/dollar.png" },
+        euro: { name: "Euro", img: "./assets/euro.png" },
+        libra: { name: "Libra Esterlina", img: "./assets/libra.png" },
+        btc: { name: "Bitcoin", img: "./assets/bitcoin.png" }
+    };
+
+    const selectedCurrency = currencySelect.value;
+    currencyName.innerHTML = currencyData[selectedCurrency].name;
+    currencyImg.src = currencyData[selectedCurrency].img;
+
+    convertValues();
 }
 
-currencySelect.addEventListener("change", changeCurrency)
-convertButton.addEventListener("click", convertValues)
+currencySelect.addEventListener("change", changeCurrency);
+convertButton.addEventListener("click", convertValues);
